@@ -1,17 +1,18 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { colors, fontSize, spacing } from '../../constants/theme';
+import BybitMarketData from '../../components/Bybit/BybitMarketData';
+import { colors } from '../../constants/theme';
 
 export default function BybitSymbolScreen() {
   const { symbol } = useLocalSearchParams();
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Carregando {symbol}...</Text>
-    </View>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      <BybitMarketData symbol={symbol} />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.backgroundDark, alignItems: 'center', justifyContent: 'center' },
-  text: { color: colors.textPrimary, fontSize: fontSize.lg, padding: spacing.lg },
+  container: { flex: 1, backgroundColor: colors.backgroundDark },
 });
