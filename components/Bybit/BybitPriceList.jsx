@@ -115,7 +115,7 @@ const BybitPriceList = () => {
             onPress={() => setCurrentPage(p => p - 1)}
             disabled={currentPage === 1}
           >
-            <Text style={styles.pageBtnText}>← Anterior</Text>
+            <Text style={[styles.pageBtnText, currentPage === 1 && styles.pageBtnTextDisabled]}>← Anterior</Text>
           </TouchableOpacity>
 
           <Text style={styles.pageInfo}>
@@ -127,7 +127,7 @@ const BybitPriceList = () => {
             onPress={() => setCurrentPage(p => p + 1)}
             disabled={currentPage === totalPages}
           >
-            <Text style={styles.pageBtnText}>Próxima →</Text>
+            <Text style={[styles.pageBtnText, currentPage === totalPages && styles.pageBtnTextDisabled]}>Próxima →</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -237,6 +237,9 @@ const styles = StyleSheet.create({
     color: colors.backgroundDark,
     fontWeight: 'bold',
     fontSize: fontSize.sm,
+  },
+  pageBtnTextDisabled: {
+    color: colors.textSecondary,
   },
   pageInfo: {
     color: colors.textSecondary,

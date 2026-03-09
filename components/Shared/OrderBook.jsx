@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, useWindowDimensions } from 'react-native';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
 
 /**
@@ -7,6 +7,9 @@ import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
  * bids/asks: Array de [price, amount]
  */
 const OrderBook = ({ bids, asks, loading, error }) => {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 600;
+
   const renderRows = (entries, isBid) =>
     entries && entries.length > 0 ? (
       entries.map((entry, index) => {
@@ -35,7 +38,7 @@ const OrderBook = ({ bids, asks, loading, error }) => {
       ) : error ? (
         <Text style={styles.errorText}>Erro: {error}</Text>
       ) : (
-        <View style={styles.columns}>
+        <View style={[styles.columns, isWide && styles.columnsRow]}>
           {/* Bids */}
           <View style={styles.column}>
             <Text style={styles.columnTitle}>Compras (Bids)</Text>
@@ -48,7 +51,7 @@ const OrderBook = ({ bids, asks, loading, error }) => {
           </View>
 
           {/* Divider */}
-          <View style={styles.divider} />
+          <View style={isWide ? styles.dividerVertical : styles.dividerHorizontal} />
 
           {/* Asks */}
           <View style={styles.column}>
@@ -84,15 +87,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   columns: {
+    flexDirection: 'column',
+  },
+  columnsRow: {
     flexDirection: 'row',
   },
   column: {
     flex: 1,
   },
-  divider: {
+  dividerVertical: {
     width: 1,
     backgroundColor: colors.borderColor,
     marginHorizontal: spacing.sm,
+  },
+  dividerHorizontal: {
+    height: 1,
+    backgroundColor: colors.borderColor,
+    marginVertical: spacing.sm,
   },
   columnTitle: {
     color: colors.textSecondary,

@@ -337,4 +337,35 @@ Não há `<select>`. Este projeto usa **botões horizontais com `ScrollView hori
 
 ---
 
-*Última atualização: Commit 1 — Setup Base*
+### ✅ Commit 8 — Polimentos Finais
+**O que foi feito:**
+- `app.json`: `userInterfaceStyle` alterado para `dark`; cor do splash atualizada para `#0f1419`
+- `OrderBook`: layout responsivo via `useWindowDimensions` — bids/asks em linha em telas ≥ 600dp, em coluna em telas menores
+- Botões de paginação desabilitados agora exibem cor de texto correta (`textSecondary`)
+- `MIGRACAO.md` atualizado com todas as etapas concluídas
+
+```bash
+git add .
+git commit -m "chore: polimentos de estilo e tratamento de erros"
+```
+
+---
+
+## 10. Layout Responsivo no React Native
+
+Diferentemente do CSS (`@media (min-width: 600px)`), o React Native usa o hook `useWindowDimensions`:
+
+```jsx
+import { useWindowDimensions } from 'react-native';
+
+const { width } = useWindowDimensions();
+const isWide = width >= 600;
+
+<View style={[styles.columns, isWide && styles.columnsRow]}>
+```
+
+Este padrão é usado no `OrderBook` para exibir bids e asks lado a lado em tablets e empilhados em celulares.
+
+---
+
+*Última atualização: Commit 8 — Concluído*
