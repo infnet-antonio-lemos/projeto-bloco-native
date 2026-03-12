@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import MarketData from '../Shared/MarketData';
 import OrderBook from '../Shared/OrderBook';
 import RecentTrades from '../Shared/RecentTrades';
+import LastPriceCard from '../Shared/LastPriceCard';
 import { colors, spacing, fontSize } from '../../constants/theme';
 
 const INTERVALS = [
@@ -97,6 +98,13 @@ const BybitMarketData = ({ symbol }) => {
       </TouchableOpacity>
 
       <Text style={styles.pageTitle}>Bybit — {symbol}</Text>
+
+      <LastPriceCard
+        symbol={symbol}
+        price={formattedTrades[0]?.price}
+        loading={loading}
+        error={error}
+      />
 
       <MarketData
         data={klines}

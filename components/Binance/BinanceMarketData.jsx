@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import MarketData from '../Shared/MarketData';
 import OrderBook from '../Shared/OrderBook';
 import RecentTrades from '../Shared/RecentTrades';
+import LastPriceCard from '../Shared/LastPriceCard';
 import { colors, spacing, fontSize } from '../../constants/theme';
 
 const INTERVALS = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1w', '1M'];
@@ -88,6 +89,13 @@ const BinanceMarketData = ({ symbol }) => {
       </TouchableOpacity>
 
       <Text style={styles.pageTitle}>Binance — {symbol}</Text>
+
+      <LastPriceCard
+        symbol={symbol}
+        price={formattedTrades[formattedTrades.length - 1]?.price}
+        loading={loading}
+        error={error}
+      />
 
       <MarketData
         data={klinesData}
