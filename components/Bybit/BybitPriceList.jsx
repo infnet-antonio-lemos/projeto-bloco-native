@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
+import RefreshButton from '../Shared/RefreshButton';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -22,23 +23,24 @@ const BybitPriceList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  const fetchPrices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('https://api.bybit.com/v5/market/tickers?category=spot');
+      if (!response.ok) throw new Error('Falha ao buscar dados');
+      const data = await response.json();
+      if (data.retCode !== 0) throw new Error(data.retMsg || 'Erro da API Bybit');
+      const sorted = data.result.list.sort((a, b) => a.symbol.localeCompare(b.symbol));
+      setPrices(sorted);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('https://api.bybit.com/v5/market/tickers?category=spot');
-        if (!response.ok) throw new Error('Falha ao buscar dados');
-        const data = await response.json();
-        if (data.retCode !== 0) throw new Error(data.retMsg || 'Erro da API Bybit');
-        const sorted = data.result.list.sort((a, b) => a.symbol.localeCompare(b.symbol));
-        setPrices(sorted);
-        setFilteredPrices(sorted);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPrices();
   }, []);
 
@@ -73,14 +75,17 @@ const BybitPriceList = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Filtrar por símbolo (ex: BTCUSDT)..."
-        placeholderTextColor={colors.textSecondary}
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-        autoCapitalize="characters"
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Filtrar por símbolo..."
+          placeholderTextColor={colors.textSecondary}
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          autoCapitalize="characters"
+        />
+        <RefreshButton onPress={fetchPrices} loading={loading} />
+      </View>
 
       <View style={styles.tableHeader}>
         <Text style={[styles.headerCell, styles.symbolCol]}>Símbolo</Text>
@@ -159,16 +164,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: spacing.lg,
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.lg,
+    gap: spacing.sm,
+  },
   searchInput: {
+    flex: 1,
     backgroundColor: colors.backgroundCard,
     color: colors.textPrimary,
     borderWidth: 1,
     borderColor: colors.borderColor,
     borderRadius: borderRadius.md,
-    margin: spacing.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     fontSize: fontSize.md,
+    height: 50,
   },
   tableHeader: {
     flexDirection: 'row',
