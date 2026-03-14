@@ -24,11 +24,11 @@ export default function RootLayout() {
         />
         <Drawer.Screen
           name="binance"
-          options={{ title: 'Binance', drawerLabel: 'Binance 🟡' }}
+          options={{ title: 'Binance', drawerLabel: 'Binance 🟡', headerShown: false }}
         />
         <Drawer.Screen
           name="bybit"
-          options={{ title: 'Bybit', drawerLabel: 'Bybit 🟠' }}
+          options={{ title: 'Bybit', drawerLabel: 'Bybit 🟠', headerShown: false }}
         />
       </Drawer>
     </GestureHandlerRootView>
