@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import MarketData from '../Shared/MarketData';
 import OrderBook from '../Shared/OrderBook';
@@ -27,44 +27,48 @@ const BybitMarketData = ({ symbol }) => {
   const [klineInterval, setKlineInterval] = useState('60');
   const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(async (isRefresh = false) => {
     if (!symbol) return;
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      const [klinesRes, tradesRes, orderBookRes] = await Promise.all([
+        fetch(`https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${klineInterval}&limit=${limit}`),
+        fetch(`https://api.bybit.com/v5/market/recent-trade?category=spot&symbol=${symbol}&limit=20`),
+        fetch(`https://api.bybit.com/v5/market/orderbook?category=spot&symbol=${symbol}&limit=10`),
+      ]);
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [klinesRes, tradesRes, orderBookRes] = await Promise.all([
-          fetch(`https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${klineInterval}&limit=${limit}`),
-          fetch(`https://api.bybit.com/v5/market/recent-trade?category=spot&symbol=${symbol}&limit=20`),
-          fetch(`https://api.bybit.com/v5/market/orderbook?category=spot&symbol=${symbol}&limit=10`),
-        ]);
+      const [klinesData, tradesData, orderBookData] = await Promise.all([
+        klinesRes.json(),
+        tradesRes.json(),
+        orderBookRes.json(),
+      ]);
 
-        const [klinesData, tradesData, orderBookData] = await Promise.all([
-          klinesRes.json(),
-          tradesRes.json(),
-          orderBookRes.json(),
-        ]);
+      if (klinesData.retCode !== 0) throw new Error(klinesData.retMsg);
+      if (tradesData.retCode !== 0) throw new Error(tradesData.retMsg);
+      if (orderBookData.retCode !== 0) throw new Error(orderBookData.retMsg);
 
-        if (klinesData.retCode !== 0) throw new Error(klinesData.retMsg);
-        if (tradesData.retCode !== 0) throw new Error(tradesData.retMsg);
-        if (orderBookData.retCode !== 0) throw new Error(orderBookData.retMsg);
-
-        setKlines(klinesData.result.list);
-        setTrades(tradesData.result.list);
-        setOrderBook(orderBookData.result);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    const intervalId = setInterval(fetchData, 5000);
-    return () => clearInterval(intervalId);
+      setKlines(klinesData.result.list);
+      setTrades(tradesData.result.list);
+      setOrderBook(orderBookData.result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      if (isRefresh) setRefreshing(false);
+      else setLoading(false);
+    }
   }, [symbol, klineInterval, limit]);
+
+  const handleRefresh = useCallback(() => fetchData(true), [fetchData]);
+
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(() => fetchData(), 5000);
+    return () => clearInterval(intervalId);
+  }, [fetchData]);
 
   if (loading && !orderBook) {
     return (
@@ -91,7 +95,18 @@ const BybitMarketData = ({ symbol }) => {
   }));
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       {/* Voltar */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <Text style={styles.backBtnText}>← Voltar para Lista de Preços</Text>

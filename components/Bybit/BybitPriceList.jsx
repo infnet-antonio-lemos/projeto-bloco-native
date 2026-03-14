@@ -19,13 +19,15 @@ const BybitPriceList = () => {
   const [prices, setPrices] = useState([]);
   const [filteredPrices, setFilteredPrices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchPrices = async () => {
+  const fetchPrices = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
       setError(null);
       const response = await fetch('https://api.bybit.com/v5/market/tickers?category=spot');
       if (!response.ok) throw new Error('Falha ao buscar dados');
@@ -36,9 +38,12 @@ const BybitPriceList = () => {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (isRefresh) setRefreshing(false);
+      else setLoading(false);
     }
   };
+
+  const handleRefresh = () => fetchPrices(true);
 
   useEffect(() => {
     fetchPrices();
@@ -95,6 +100,8 @@ const BybitPriceList = () => {
       <FlatList
         data={currentItems}
         keyExtractor={(item) => item.symbol}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={[styles.row, index % 2 === 0 && styles.rowAlt]}

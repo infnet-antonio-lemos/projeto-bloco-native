@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import MarketData from '../Shared/MarketData';
 import OrderBook from '../Shared/OrderBook';
@@ -18,44 +18,48 @@ const BinanceMarketData = ({ symbol }) => {
   const [klinesInterval, setKlinesInterval] = useState('1d');
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(async (isRefresh = false) => {
     if (!symbol) return;
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      const [orderBookRes, tradesRes, klinesRes] = await Promise.all([
+        fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=10`),
+        fetch(`https://api.binance.com/api/v3/trades?symbol=${symbol}&limit=10`),
+        fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${klinesInterval}&limit=${limit}`),
+      ]);
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [orderBookRes, tradesRes, klinesRes] = await Promise.all([
-          fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=10`),
-          fetch(`https://api.binance.com/api/v3/trades?symbol=${symbol}&limit=10`),
-          fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${klinesInterval}&limit=${limit}`),
-        ]);
-
-        if (!orderBookRes.ok || !tradesRes.ok || !klinesRes.ok) {
-          throw new Error('Falha ao buscar dados');
-        }
-
-        const [orderBookData, tradesData, klinesRaw] = await Promise.all([
-          orderBookRes.json(),
-          tradesRes.json(),
-          klinesRes.json(),
-        ]);
-
-        setOrderBook(orderBookData);
-        setTrades(tradesData);
-        setKlinesData(klinesRaw);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!orderBookRes.ok || !tradesRes.ok || !klinesRes.ok) {
+        throw new Error('Falha ao buscar dados');
       }
-    };
 
-    fetchData();
-    const intervalId = setInterval(fetchData, 5000);
-    return () => clearInterval(intervalId);
+      const [orderBookData, tradesData, klinesRaw] = await Promise.all([
+        orderBookRes.json(),
+        tradesRes.json(),
+        klinesRes.json(),
+      ]);
+
+      setOrderBook(orderBookData);
+      setTrades(tradesData);
+      setKlinesData(klinesRaw);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      if (isRefresh) setRefreshing(false);
+      else setLoading(false);
+    }
   }, [symbol, klinesInterval, limit]);
+
+  const handleRefresh = useCallback(() => fetchData(true), [fetchData]);
+
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(() => fetchData(), 5000);
+    return () => clearInterval(intervalId);
+  }, [fetchData]);
 
   if (loading && !orderBook) {
     return (
@@ -82,7 +86,18 @@ const BinanceMarketData = ({ symbol }) => {
   }));
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       {/* Voltar */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <Text style={styles.backBtnText}>← Voltar para Lista de Preços</Text>
