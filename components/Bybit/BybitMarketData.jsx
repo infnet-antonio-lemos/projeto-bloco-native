@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
 import MarketData from '../Shared/MarketData';
 import OrderBook from '../Shared/OrderBook';
 import RecentTrades from '../Shared/RecentTrades';
@@ -20,7 +19,6 @@ const INTERVALS = [
 const LIMITS = [1, 5, 10, 20, 50, 100, 200];
 
 const BybitMarketData = ({ symbol }) => {
-  const router = useRouter();
   const [orderBook, setOrderBook] = useState(null);
   const [trades, setTrades] = useState([]);
   const [klines, setKlines] = useState([]);
@@ -107,11 +105,6 @@ const BybitMarketData = ({ symbol }) => {
         />
       }
     >
-      {/* Voltar */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Text style={styles.backBtnText}>← Voltar para Lista de Preços</Text>
-      </TouchableOpacity>
-
       <Text style={styles.pageTitle}>Bybit — {symbol}</Text>
 
       <LastPriceCard
@@ -176,13 +169,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     textAlign: 'center',
     padding: spacing.lg,
-  },
-  backBtn: {
-    marginBottom: spacing.lg,
-  },
-  backBtnText: {
-    color: colors.primary,
-    fontSize: fontSize.md,
   },
   pageTitle: {
     color: colors.textPrimary,

@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { DrawerToggleButton } from '@react-navigation/drawer';
 import { colors } from '../../constants/theme';
 
 export default function BinanceLayout() {
@@ -11,7 +12,13 @@ export default function BinanceLayout() {
         contentStyle: { backgroundColor: colors.backgroundDark },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Binance — Pares' }} />
+      <Stack.Screen
+        name="index"
+        options={{
+          title: 'Binance — Pares',
+          headerLeft: () => <DrawerToggleButton tintColor={colors.primary} />,
+        }}
+      />
       <Stack.Screen name="[symbol]" options={{ title: 'Detalhes do Par' }} />
     </Stack>
   );
