@@ -62,6 +62,16 @@ function RootLayoutNav() {
               drawerItemStyle: { display: 'none' },
             }}
           />
+          <Drawer.Screen
+            name="profile"
+            options={{
+              title: 'Perfil',
+              drawerLabel: 'Perfil 👤',
+              headerStyle: { backgroundColor: colors.secondary },
+              headerTintColor: colors.primary,
+              headerTitleStyle: { color: colors.textPrimary, fontWeight: 'bold' },
+            }}
+          />
         </Drawer>
       </AuthGuard>
     </GestureHandlerRootView>

@@ -28,7 +28,14 @@
     },
     "scheme": "cryptoview",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite que o CryptoView acesse suas fotos para definir a foto de perfil.",
+          "cameraPermission": "Permite que o CryptoView use a câmera para tirar uma foto de perfil."
+        }
+      ]
     ]
   }
 }
