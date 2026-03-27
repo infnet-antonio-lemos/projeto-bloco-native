@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
 import { mockUsers } from '../data/mockUsers';
 
 const STORAGE_KEY = 'cryptoview_user';
@@ -32,6 +33,13 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Usuário ou senha incorretos.' };
     }
     const { password: _omit, ...safeUser } = found;
+
+    const permanentUri = `${FileSystem.documentDirectory}profile_${username}.jpg`;
+    const fileInfo = await FileSystem.getInfoAsync(permanentUri);
+    if (fileInfo.exists) {
+      safeUser.profilePicture = `${permanentUri}?t=${Date.now()}`;
+    }
+
     setUser(safeUser);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(safeUser));
     return { success: true };
@@ -43,7 +51,11 @@ export function AuthProvider({ children }) {
   }
 
   async function updateProfilePicture(uri) {
-    const updated = { ...user, profilePicture: uri };
+    const permanentUri = `${FileSystem.documentDirectory}profile_${user.username}.jpg`;
+    await FileSystem.deleteAsync(permanentUri, { idempotent: true });
+    await FileSystem.copyAsync({ from: uri, to: permanentUri });
+    const cacheBustedUri = `${permanentUri}?t=${Date.now()}`;
+    const updated = { ...user, profilePicture: cacheBustedUri };
     setUser(updated);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   }
