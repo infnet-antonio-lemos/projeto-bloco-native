@@ -116,6 +116,7 @@ const BinanceMarketData = ({ symbol }) => {
         currentLimit={limit}
         onLimitChange={setLimit}
         itemsPerPage={5}
+        symbol={symbol}
       />
 
       <OrderBook

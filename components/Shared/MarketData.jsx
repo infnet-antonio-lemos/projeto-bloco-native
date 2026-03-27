@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
+import PriceChart from './PriceChart';
 
 /**
  * Tabela de velas (klines) reutilizável.
@@ -26,8 +27,10 @@ const MarketData = ({
   currentLimit,
   onLimitChange,
   itemsPerPage = 10,
+  symbol,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -62,7 +65,24 @@ const MarketData = ({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Dados Históricos ({currentLabel})</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.sectionTitle}>Dados Históricos ({currentLabel})</Text>
+        <TouchableOpacity
+          style={[styles.chartToggleBtn, showChart && styles.chartToggleBtnActive]}
+          onPress={() => setShowChart(v => !v)}
+        >
+          <Text style={styles.chartToggleText}>📊</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showChart && (
+        <PriceChart
+          symbol={symbol}
+          currentInterval={currentInterval}
+          intervals={intervals}
+          data={data}
+        />
+      )}
 
       {/* Seletor de intervalo */}
       <Text style={styles.filterLabel}>Intervalo:</Text>
@@ -167,7 +187,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: 'bold',
     fontSize: fontSize.lg,
-    marginBottom: spacing.md,
   },
   filterLabel: {
     color: colors.textSecondary,
@@ -257,5 +276,25 @@ const styles = StyleSheet.create({
   pageInfo: {
     color: colors.textSecondary,
     fontSize: fontSize.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  chartToggleBtn: {
+    padding: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderColor,
+    backgroundColor: 'rgba(0,212,255,0.05)',
+  },
+  chartToggleBtnActive: {
+    backgroundColor: 'rgba(0,212,255,0.2)',
+    borderColor: colors.primary,
+  },
+  chartToggleText: {
+    fontSize: fontSize.lg,
   },
 });
