@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import PlatformPressable from '../Shared/PlatformPressable';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
 
 const formatVolume = (usd) => {
@@ -86,9 +87,9 @@ const ExchangeCard = ({ exchange }) => {
         <Text style={styles.status}>
           {exchange.status === 'active' ? '🟢 Ativo' : '🔴 Inativo'}
         </Text>
-        <TouchableOpacity style={styles.button} onPress={handleDetailsClick}>
+        <PlatformPressable style={styles.button} onPress={handleDetailsClick}>
           <Text style={styles.buttonText}>Ver Detalhes</Text>
-        </TouchableOpacity>
+        </PlatformPressable>
       </View>
     </View>
   );

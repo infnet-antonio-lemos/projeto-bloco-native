@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
 import RefreshButton from '../Shared/RefreshButton';
+import PlatformPressable from '../Shared/PlatformPressable';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -103,7 +104,7 @@ const BybitPriceList = () => {
         refreshing={refreshing}
         onRefresh={handleRefresh}
         renderItem={({ item, index }) => (
-          <TouchableOpacity
+          <PlatformPressable
             style={[styles.row, index % 2 === 0 && styles.rowAlt]}
             onPress={() => router.push(`/bybit/${item.symbol}`)}
           >
@@ -113,7 +114,7 @@ const BybitPriceList = () => {
             <Text style={[styles.cell, styles.priceCol]}>
               {parseFloat(item.lastPrice).toFixed(8)}
             </Text>
-          </TouchableOpacity>
+          </PlatformPressable>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum resultado encontrado</Text>
