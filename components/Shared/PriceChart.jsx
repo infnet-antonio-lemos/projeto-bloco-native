@@ -53,10 +53,18 @@ const PriceChart = ({ symbol, currentInterval, intervals, data }) => {
   // 2. ADAPTAÇÃO AO LIMITE (Calculando a densidade do Eixo X)
   // =========================================================
   const totalPoints = rawLabels.length;
-  let maxLabels = 6;
-  if (totalPoints <= 15) maxLabels = totalPoints;
-  else if (totalPoints <= 50) maxLabels = 8;
-  else maxLabels = 10;
+  const firstLabel = rawLabels[0] || '';
+  const isLongLabel = firstLabel.length > 6;
+
+  let maxLabels;
+  if (!isLongLabel) {
+    if (totalPoints <= 15) maxLabels = totalPoints;
+    else if (totalPoints <= 50) maxLabels = 8;
+    else maxLabels = 10;
+  } else {
+    if (totalPoints <= 6) maxLabels = totalPoints;
+    else maxLabels = 4;
+  }
 
   const step = Math.ceil(totalPoints / maxLabels);
   const displayLabels = rawLabels.map((label, i) => (i % step === 0 ? label : ''));
