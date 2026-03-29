@@ -72,6 +72,14 @@ function RootLayoutNav() {
               headerTitleStyle: { color: colors.textPrimary, fontWeight: 'bold' },
             }}
           />
+          <Drawer.Screen
+            name="(admin)"
+            options={{
+              title: 'Admin',
+              drawerLabel: 'Admin 🔒',
+              headerShown: false,
+            }}
+          />
         </Drawer>
       </AuthGuard>
     </GestureHandlerRootView>
