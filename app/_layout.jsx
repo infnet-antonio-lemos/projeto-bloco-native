@@ -28,6 +28,7 @@ function AuthGuard({ children }) {
 }
 
 function RootLayoutNav() {
+  const { hasRole } = useAuth();
   return (
     <GestureHandlerRootView style={styles.root}>
       <AuthGuard>
@@ -78,6 +79,7 @@ function RootLayoutNav() {
               title: 'Admin',
               drawerLabel: 'Admin 🔒',
               headerShown: false,
+              drawerItemStyle: hasRole('admin') ? undefined : { display: 'none' },
             }}
           />
         </Drawer>

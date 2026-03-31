@@ -17,7 +17,7 @@ export default function AdminLayout() {
     }
   }, [isAuthenticated, loading]);
 
-  if (loading) return null;
+  if (loading || !isAuthenticated || !hasRole('admin')) return null;
 
   return (
     <Stack
