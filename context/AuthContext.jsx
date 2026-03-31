@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { mockUsers } from '../data/mockUsers';
 
 const STORAGE_KEY = 'cryptoview_user';
+const PICTURE_KEY = (username) => `cryptoview_picture_${username}`;
 const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
 const AuthContext = createContext(null);
@@ -54,10 +55,18 @@ export function AuthProvider({ children }) {
     }
     const { password: _omit, ...safeUser } = found;
 
-    const permanentUri = `${FileSystem.documentDirectory}profile_${username}.jpg`;
-    const fileInfo = await FileSystem.getInfoAsync(permanentUri);
-    if (fileInfo.exists) {
-      safeUser.profilePicture = `${permanentUri}?t=${Date.now()}`;
+    if (FileSystem.documentDirectory) {
+      const permanentUri = `${FileSystem.documentDirectory}profile_${username}.jpg`;
+      const fileInfo = await FileSystem.getInfoAsync(permanentUri);
+      if (fileInfo.exists) {
+        safeUser.profilePicture = `${permanentUri}?t=${Date.now()}`;
+      }
+    } else {
+      // Web: restore picture saved across sessions
+      const savedPicture = await AsyncStorage.getItem(PICTURE_KEY(username));
+      if (savedPicture) {
+        safeUser.profilePicture = savedPicture;
+      }
     }
 
     const session = { ...safeUser, expiresAt: Date.now() + SESSION_DURATION };
@@ -70,14 +79,35 @@ export function AuthProvider({ children }) {
     return user?.role === role;
   }
 
+  async function blobUrlToDataUrl(blobUrl) {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
   async function updateProfilePicture(uri) {
-    const permanentUri = `${FileSystem.documentDirectory}profile_${user.username}.jpg`;
-    await FileSystem.deleteAsync(permanentUri, { idempotent: true });
-    await FileSystem.copyAsync({ from: uri, to: permanentUri });
-    const cacheBustedUri = `${permanentUri}?t=${Date.now()}`;
-    const updated = { ...user, profilePicture: cacheBustedUri };
+    let finalUri = uri;
+    if (FileSystem.documentDirectory) {
+      const permanentUri = `${FileSystem.documentDirectory}profile_${user.username}.jpg`;
+      await FileSystem.deleteAsync(permanentUri, { idempotent: true });
+      await FileSystem.copyAsync({ from: uri, to: permanentUri });
+      finalUri = `${permanentUri}?t=${Date.now()}`;
+    } else {
+      // Web: blob URLs are ephemeral — convert to base64 data URL for persistence
+      if (uri.startsWith('blob:')) {
+        finalUri = await blobUrlToDataUrl(uri);
+        URL.revokeObjectURL(uri);
+      }
+    }
+    const updated = { ...user, profilePicture: finalUri };
     setUser(updated);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await AsyncStorage.setItem(PICTURE_KEY(user.username), finalUri);
   }
 
   return (
