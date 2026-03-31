@@ -1,4 +1,5 @@
-import { Platform, TouchableOpacity, TouchableNativeFeedback, View } from 'react-native';
+import { TouchableOpacity, TouchableNativeFeedback, View } from 'react-native';
+import { isAndroid } from '../../utils/platform';
 
 /**
  * Platform-aware pressable component.
@@ -6,7 +7,7 @@ import { Platform, TouchableOpacity, TouchableNativeFeedback, View } from 'react
  * iOS:     Opacity fade via TouchableOpacity.
  */
 export default function PlatformPressable({ onPress, style, children, disabled }) {
-  if (Platform.OS === 'android') {
+  if (isAndroid()) {
     return (
       <TouchableNativeFeedback
         onPress={onPress}

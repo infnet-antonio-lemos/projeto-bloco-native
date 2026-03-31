@@ -9,8 +9,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Modal,
-  Platform,
 } from 'react-native';
+import { isWeb } from '../utils/platform';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -27,12 +27,12 @@ export default function ProfileScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   async function pickFromCamera() {
-    if (Platform.OS === 'web') {
+    if (isWeb()) {
       const permission = cameraPermission?.granted
         ? cameraPermission
         : await requestCameraPermission();
       if (!permission.granted) {
-        if (Platform.OS === 'web') {
+        if (isWeb()) {
           window.alert('Permita o acesso à câmera nas configurações do navegador.');
         } else {
           Alert.alert('Permissão necessária', 'Permita o acesso à câmera nas configurações do navegador.');
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
   }
 
   async function pickFromGallery() {
-    if (Platform.OS === 'web') {
+    if (isWeb()) {
       fileInputRef.current?.click();
       return;
     }
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
   }
 
   function handleChangePhoto() {
-    if (Platform.OS === 'web') {
+    if (isWeb()) {
       setShowPhotoMenu(true);
       return;
     }
@@ -120,7 +120,7 @@ export default function ProfileScreen() {
 
   return (
     <>
-      {Platform.OS === 'web' && (
+      {isWeb() && (
         <input
           ref={fileInputRef}
           type="file"

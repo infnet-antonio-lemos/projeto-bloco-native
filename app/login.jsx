@@ -7,9 +7,9 @@ import {
   StyleSheet,
   Image,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
+import { isIOS } from '../utils/platform';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, fontSize } from '../constants/theme';
@@ -48,7 +48,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={isIOS() ? 'padding' : 'height'}
     >
       <ScrollView
         contentContainerStyle={styles.container}
